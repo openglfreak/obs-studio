@@ -163,8 +163,10 @@ finish:
 }
 #endif
 
-#ifdef _WIN32
 extern bool load_nvenc_lib(void);
+
+#ifndef _WIN32
+bool load_nvenc_lib(void) { return os_dlopen("libnvidia-encode.so.1"); }
 #endif
 
 static bool nvenc_supported(void)
@@ -176,35 +178,23 @@ static bool nvenc_supported(void)
 	profile_start(nvenc_check_name);
 
 	AVCodec *nvenc = avcodec_find_encoder_by_name("nvenc_h264");
-	void *lib = NULL;
 	bool success = false;
 
 	if (!nvenc) {
-		goto cleanup;
+		goto finish;
 	}
 
 #if defined(_WIN32)
 	if (!nvenc_device_available()) {
-		goto cleanup;
-	}
-	if (load_nvenc_lib()) {
-		success = true;
 		goto finish;
 	}
-#else
-	lib = os_dlopen("libnvidia-encode.so.1");
 #endif
 
 	/* ------------------------------------------- */
 
-	success = !!lib;
+	success = load_nvenc_lib();
 
-cleanup:
-	if (lib)
-		os_dlclose(lib);
-#if defined(_WIN32)
 finish:
-#endif
 	profile_end(nvenc_check_name);
 	return success;
 }
