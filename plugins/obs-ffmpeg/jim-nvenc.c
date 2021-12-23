@@ -895,7 +895,10 @@ static void *nvenc_create(obs_data_t *settings, obs_encoder_t *encoder)
 	}
 
 #ifndef _WIN32
-	if (obs_nv12_tex_active()) {
+	/* obs_nv12_tex_active() seems to not work here. */
+	video_t *video = obs_encoder_video(encoder);
+	const struct video_output_info *voi = video_output_get_info(video);
+	if (obs_nv12_tex_active() || voi->format == VIDEO_FORMAT_NV12) {
 		blog(LOG_INFO,
 		     "[jim-nvenc] nv12 active, falling back to ffmpeg");
 		goto reroute;
