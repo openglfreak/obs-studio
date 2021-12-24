@@ -5,7 +5,7 @@ on:
     paths-ignore:
       - '**.md'
     branches:
-      - master
+      - linux-jim-nvenc
     tags:
       - '*'
   pull_request:
